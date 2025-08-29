@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume Builder</title>
+    <title>AI Resume Builder</title>
     <!-- Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts for the "Inter" font -->
@@ -17,263 +17,407 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #e5e7eb;
+            overflow: hidden;
         }
+
+        /* Subtle 3D Background Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 10%, #d1d5db 0%, transparent 20%),
+                        radial-gradient(circle at 90% 90%, #9ca3af 0%, transparent 30%);
+            transform: perspective(1000px) rotate3d(1, 1, 0, 5deg);
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        /* Page Layout */
         .container {
             max-width: 1024px;
+            min-height: 100vh;
         }
-        /* Custom styles for the resume output */
-        #resume-output h1,
-        #resume-output h2 {
-            text-transform: uppercase;
-            font-weight: 700;
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
         }
-        #resume-output h2 {
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 4px;
+        .modal-content {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 6px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            animation: fadeIn 0.3s ease-out;
         }
-        /* Modern Template Styles */
-        .modern-template h1 {
-            color: #4338ca; /* A shade of indigo */
-            font-size: 2.5rem;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
-        .modern-template h2 {
-            border-bottom: 2px solid #6366f1; /* A brighter indigo */
-            color: #4338ca;
+
+        /* Buttons */
+        .gradient-button {
+            background-image: linear-gradient(to right, #4f46e5, #818cf8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .modern-template .skill-tag {
-            background-color: #e0e7ff; /* A very light indigo */
-            color: #4338ca;
-            font-weight: 600;
+        .gradient-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px -1px rgba(0, 0, 0, 0.15), 0 3px 6px -1px rgba(0, 0, 0, 0.08);
+        }
+        .ai-button {
+            background-image: linear-gradient(to right, #059669, #34d399);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .ai-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px -1px rgba(0, 0, 0, 0.15), 0 3px 6px -1px rgba(0, 0, 0, 0.08);
         }
     </style>
 </head>
-<body class="bg-gray-100 p-4 sm:p-8 flex items-center justify-center min-h-screen">
+<body class="p-4 sm:p-8 flex flex-col justify-center items-center min-h-screen">
 
-    <div class="container mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-10 w-full">
-
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Simple Resume Builder</h1>
-            <p class="text-gray-500 mt-2">Fill in your details and get an ATS-friendly resume instantly.</p>
+    <!-- Main Content -->
+    <div id="main-content" class="container mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-10 w-full text-center">
+        <header class="mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">AI Resume Builder</h1>
+            <p class="text-gray-500 mt-2">Let AI create a polished, professional resume for you.</p>
         </header>
+        <button id="start-button" class="w-full sm:w-auto text-white rounded-md py-3 px-8 font-semibold gradient-button">
+            Generate Resume with AI
+        </button>
+    </div>
 
-        <!-- Form Section -->
-        <form id="resume-form" class="space-y-8">
-
-            <!-- Basic Information -->
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Basic Information</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label for="fullName" class="block text-sm font-medium text-gray-700">1. Full Name</label>
-                        <input type="text" id="fullName" name="fullName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" required>
-                    </div>
-                    <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-700">2. Phone number</label>
-                        <input type="tel" id="phone" name="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" required>
-                    </div>
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">3. Email ID</label>
-                        <input type="email" id="email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" required>
-                    </div>
-                    <div>
-                        <label for="location" class="block text-sm font-medium text-gray-700">4. Location (city, state)</label>
-                        <input type="text" id="location" name="location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" required>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="hasLinkedIn" name="hasLinkedIn" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                        <label for="hasLinkedIn" class="ml-2 block text-sm text-gray-700">5. I want to add a LinkedIn profile link</label>
-                        <input type="url" id="linkedin" name="linkedin" placeholder="Paste your LinkedIn URL here" class="ml-4 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" style="display: none;">
-                    </div>
-                </div>
+    <!-- Modal Pop-up -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div id="modal-content" class="modal-content">
+            <h2 id="modal-title" class="text-2xl font-semibold text-gray-700 mb-4"></h2>
+            <div id="progress-indicator" class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 0%;"></div>
             </div>
-
-            <!-- Career Objective -->
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Career Objective</h2>
-                <div>
-                    <label for="careerObjective" class="block text-sm font-medium text-gray-700">6. Write a short career objective/summary</label>
-                    <textarea id="careerObjective" name="careerObjective" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"></textarea>
-                </div>
+            <div id="question-container" class="space-y-4">
+                <!-- Questions will be injected here -->
             </div>
-
-            <!-- Work Experience -->
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Work Experience</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label for="jobTitle" class="block text-sm font-medium text-gray-700">7. Job Title (e.g., Cashier at Vishal Mega Mart)</label>
-                        <input type="text" id="jobTitle" name="jobTitle" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                    </div>
-                    <div>
-                        <label for="duration" class="block text-sm font-medium text-gray-700">8. Duration (start month/year – end month/year)</label>
-                        <input type="text" id="duration" name="duration" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                    </div>
-                    <div>
-                        <label for="responsibilities" class="block text-sm font-medium text-gray-700">9. Main Responsibilities (list them, separated by a comma or new line)</label>
-                        <textarea id="responsibilities" name="responsibilities" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"></textarea>
-                    </div>
-                    <div>
-                        <label for="achievements" class="block text-sm font-medium text-gray-700">10. Achievements (list them, separated by a comma or new line)</label>
-                        <textarea id="achievements" name="achievements" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Skills -->
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Skills</h2>
-                <div>
-                    <label for="skills" class="block text-sm font-medium text-gray-700">11. Skills (list them, separated by a comma or new line)</label>
-                    <textarea id="skills" name="skills" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"></textarea>
-                </div>
-            </div>
-
-            <!-- Education -->
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Education</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label for="education" class="block text-sm font-medium text-gray-700">12. Your highest qualification (e.g., BA, 2022, University of XYZ)</label>
-                        <input type="text" id="education" name="education" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                    </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="hasDeshpande" name="hasDeshpande" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                        <label for="hasDeshpande" class="ml-2 block text-sm text-gray-700">13. I want to add my ongoing training at Deshpande Skilling</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Certifications (Optional) -->
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Certifications (Optional)</h2>
-                <div>
-                    <label for="certifications" class="block text-sm font-medium text-gray-700">14. List any certifications (e.g., Meta Digital Marketing, Data Entry Operator)</label>
-                    <textarea id="certifications" name="certifications" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"></textarea>
-                </div>
-            </div>
-
-            <!-- Extras -->
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Extras</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label for="languages" class="block text-sm font-medium text-gray-700">15. Languages Known (e.g., English, Kannada, Hindi)</label>
-                        <input type="text" id="languages" name="languages" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                    </div>
-                    <div>
-                        <label for="hobbies" class="block text-sm font-medium text-gray-700">16. Hobbies/Interests (e.g., Reading, Hiking)</label>
-                        <input type="text" id="hobbies" name="hobbies" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Template Selection -->
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Template Selection</h2>
-                <div>
-                    <label for="template" class="block text-sm font-medium text-gray-700">Choose a template</label>
-                    <select id="template" name="template" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
-                        <option value="classic">Classic</option>
-                        <option value="modern">Modern</option>
-                    </select>
-                </div>
-            </div>
-            
-            <button type="submit" class="w-full bg-indigo-600 text-white rounded-md py-3 font-semibold hover:bg-indigo-700 transition-colors duration-200">
-                Generate Resume
-            </button>
-
-        </form>
-
-        <!-- Resume Output Section (Hidden by default) -->
-        <div id="resume-container" class="mt-8 hidden">
-            <div id="resume-output" class="p-6 border border-gray-300 rounded-lg shadow-inner space-y-4">
-                <!-- Resume content will be injected here -->
-            </div>
-            <div class="flex justify-center space-x-4 mt-6">
-                <button id="download-pdf-button" class="bg-indigo-600 text-white rounded-md py-2 px-4 font-semibold hover:bg-indigo-700 transition-colors duration-200">
-                    Download as PDF
+            <div class="flex justify-between mt-6">
+                <button id="back-button" class="bg-gray-200 text-gray-800 rounded-md py-2 px-4 font-semibold hover:bg-gray-300 transition-colors duration-200 hidden">
+                    Back
                 </button>
-                <button id="download-docx-button" class="bg-green-600 text-white rounded-md py-2 px-4 font-semibold hover:bg-green-700 transition-colors duration-200">
-                    Download as DOCX
-                </button>
-                <button id="back-button" class="bg-gray-200 text-gray-800 rounded-md py-2 px-4 font-semibold hover:bg-gray-300 transition-colors duration-200">
-                    Edit Information
+                <button id="next-button" class="bg-indigo-600 text-white rounded-md py-2 px-4 font-semibold hover:bg-indigo-700 transition-colors duration-200">
+                    Next
                 </button>
             </div>
         </div>
+    </div>
 
+    <!-- Resume Output Section -->
+    <div id="resume-container" class="container mx-auto hidden mt-8">
+        <div id="loading-indicator" class="text-center text-gray-500 hidden">
+            <p>Generating your resume with AI...</p>
+        </div>
+        <div id="resume-output" class="a4-page p-8 space-y-4 mx-auto">
+            <!-- AI-generated resume content will be injected here -->
+        </div>
+        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+            <button id="download-pdf-button" class="bg-indigo-600 text-white rounded-md py-2 px-4 font-semibold hover:bg-indigo-700 transition-colors duration-200 hidden">
+                Download as PDF
+            </button>
+            <button id="download-docx-button" class="bg-green-600 text-white rounded-md py-2 px-4 font-semibold hover:bg-green-700 transition-colors duration-200 hidden">
+                Download as DOCX
+            </button>
+        </div>
+        <div class="mt-6 text-center">
+            <button id="edit-button" class="bg-gray-200 text-gray-800 rounded-md py-2 px-4 font-semibold hover:bg-gray-300 transition-colors duration-200 hidden">
+                Edit Information
+            </button>
+        </div>
     </div>
 
     <script>
         window.onload = function() {
             // Get DOM elements
-            const form = document.getElementById('resume-form');
+            const startButton = document.getElementById('start-button');
+            const mainContent = document.getElementById('main-content');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalContent = document.getElementById('modal-content');
+            const modalTitle = document.getElementById('modal-title');
+            const questionContainer = document.getElementById('question-container');
+            const progressIndicator = document.getElementById('progress-indicator');
+            const progressBar = document.getElementById('progress-bar');
+            const backButton = document.getElementById('back-button');
+            const nextButton = document.getElementById('next-button');
             const resumeContainer = document.getElementById('resume-container');
             const resumeOutput = document.getElementById('resume-output');
-            const backButton = document.getElementById('back-button');
-            const hasLinkedInCheckbox = document.getElementById('hasLinkedIn');
-            const linkedinInput = document.getElementById('linkedin');
-            const templateSelect = document.getElementById('template');
+            const loadingIndicator = document.getElementById('loading-indicator');
             const downloadPdfButton = document.getElementById('download-pdf-button');
             const downloadDocxButton = document.getElementById('download-docx-button');
+            const editButton = document.getElementById('edit-button');
 
-            // Toggle LinkedIn input visibility
-            hasLinkedInCheckbox.addEventListener('change', (e) => {
-                linkedinInput.style.display = e.target.checked ? 'block' : 'none';
-                if (!e.target.checked) {
-                    linkedinInput.value = ''; // Clear value if unchecked
+            const totalSteps = 16;
+            let currentStep = 0;
+            let formData = {};
+
+            const questions = [
+                { id: 'fullName', label: '1. Full Name', type: 'text', required: true },
+                { id: 'phone', label: '2. Phone number', type: 'tel', required: true },
+                { id: 'email', label: '3. Email ID', type: 'email', required: true },
+                { id: 'location', label: '4. Location (city, state)', type: 'text', required: true },
+                { id: 'hasLinkedIn', label: '5. Do you want to add a LinkedIn profile link?', type: 'checkbox' },
+                { id: 'linkedin', label: 'LinkedIn Profile URL', type: 'url', parentId: 'hasLinkedIn', hidden: true },
+                { id: 'careerObjective', label: '6. Write a short career objective/summary.', type: 'textarea' },
+                { id: 'hasWorkExperience', label: '7. Do you want to add Work Experience?', type: 'checkbox' },
+                { id: 'jobTitle', label: '8. Job Title (e.g., Cashier at Vishal Mega Mart)', type: 'text', parentId: 'hasWorkExperience' },
+                { id: 'duration', label: '9. Duration (start month/year – end month/year)', type: 'text', parentId: 'hasWorkExperience' },
+                { id: 'responsibilities', label: '10. Main responsibilities (list them, separated by a comma or new line)', type: 'textarea', parentId: 'hasWorkExperience' },
+                { id: 'achievements', label: '11. Achievements (list them, separated by a comma or new line)', type: 'textarea', parentId: 'hasWorkExperience' },
+                { id: 'skills', label: '12. Which skills do you have? (list them, separated by a comma or new line)', type: 'textarea' },
+                { id: 'education', label: '13. Your highest qualification (e.g., BA, 2022, University of XYZ)', type: 'text' },
+                { id: 'hasDeshpande', label: '14. Do you want to add your ongoing training at Deshpande Skilling?', type: 'checkbox' },
+                { id: 'certifications', label: '15. Do you want to add certifications? (e.g., Meta Digital Marketing, Data Entry Operator)', type: 'textarea' },
+                { id: 'languages', label: '16. Do you want to add Languages Known? (e.g., English, Kannada, Hindi)', type: 'text' },
+                { id: 'hobbies', label: '17. Do you want to add Hobbies/Interests? (e.g., Reading, Hiking)', type: 'text' }
+            ];
+
+            // AI API key and endpoint
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            // Show the modal and start the process
+            startButton.addEventListener('click', () => {
+                modalOverlay.classList.remove('hidden');
+                currentStep = 0;
+                displayQuestion();
+            });
+
+            // Back button logic
+            backButton.addEventListener('click', () => {
+                if (currentStep > 0) {
+                    currentStep--;
+                    // Handle conditional questions when going back
+                    const currentQuestion = questions[currentStep];
+                    if (currentQuestion.hidden) {
+                        currentStep--;
+                    }
+                    displayQuestion();
                 }
             });
 
-            // Handle form submission
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
+            // Next button logic
+            nextButton.addEventListener('click', () => {
+                const currentQuestion = questions[currentStep];
+                const inputElement = document.getElementById(currentQuestion.id);
 
-                // Get form data
-                const formData = new FormData(form);
-                const data = Object.fromEntries(formData.entries());
-                const selectedTemplate = templateSelect.value;
+                // Handle validation for required fields
+                if (currentQuestion.required && !inputElement.value.trim()) {
+                    inputElement.classList.add('border-red-500');
+                    return;
+                } else {
+                    inputElement.classList.remove('border-red-500');
+                }
 
-                // Add template class and generate resume HTML
-                resumeOutput.className = 'p-6 border border-gray-300 rounded-lg shadow-inner space-y-4 ' + (selectedTemplate === 'modern' ? 'modern-template' : '');
-                const resumeHTML = generateResume(data);
-                
-                // Inject HTML and show resume container
-                resumeOutput.innerHTML = resumeHTML;
-                form.classList.add('hidden');
-                resumeContainer.classList.remove('hidden');
+                // Store data
+                if (currentQuestion.type === 'checkbox') {
+                    formData[currentQuestion.id] = inputElement.checked;
+                } else {
+                    formData[currentQuestion.id] = inputElement.value.trim();
+                }
+
+                currentStep++;
+
+                // Handle conditional questions when moving forward
+                if (currentQuestion.id === 'hasLinkedIn' && !formData.hasLinkedIn) {
+                    currentStep++;
+                } else if (currentQuestion.id === 'hasWorkExperience' && !formData.hasWorkExperience) {
+                    currentStep += 4;
+                }
+
+                // Check for end of questions
+                if (currentStep >= questions.length) {
+                    modalOverlay.classList.add('hidden');
+                    generateResume();
+                } else {
+                    displayQuestion();
+                }
             });
 
-            // Handle back button click
-            backButton.addEventListener('click', () => {
-                form.classList.remove('hidden');
+            // Handle edit button click
+            editButton.addEventListener('click', () => {
                 resumeContainer.classList.add('hidden');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                mainContent.classList.remove('hidden');
             });
+            
+            // Function to display the current question
+            function displayQuestion() {
+                const question = questions[currentStep];
+                modalTitle.textContent = question.label;
+                questionContainer.innerHTML = '';
 
+                let inputHtml = '';
+                if (question.type === 'textarea') {
+                    inputHtml = `<textarea id="${question.id}" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"></textarea>`;
+                } else if (question.type === 'checkbox') {
+                    inputHtml = `<input type="checkbox" id="${question.id}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">`;
+                } else {
+                    inputHtml = `<input type="${question.type}" id="${question.id}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">`;
+                }
+                
+                questionContainer.innerHTML = inputHtml;
+                const inputElement = document.getElementById(question.id);
+
+                // Set initial value
+                if (question.id in formData) {
+                    if (question.type === 'checkbox') {
+                        inputElement.checked = formData[question.id];
+                    } else {
+                        inputElement.value = formData[question.id];
+                    }
+                }
+
+                // Show/hide back button
+                backButton.classList.toggle('hidden', currentStep === 0);
+
+                // Update progress bar
+                progressBar.style.width = `${((currentStep) / totalSteps) * 100}%`;
+                
+                // Show final button on last step
+                if (currentStep === questions.length - 1) {
+                    nextButton.textContent = 'Generate Resume';
+                } else {
+                    nextButton.textContent = 'Next';
+                }
+            }
+
+            // Function to generate resume with AI
+            async function generateResume() {
+                mainContent.classList.add('hidden');
+                resumeContainer.classList.remove('hidden');
+                loadingIndicator.classList.remove('hidden');
+                resumeOutput.innerHTML = '';
+                
+                const prompt = `You are an expert resume writer. Please generate a complete resume based on the following information. The resume should be professional, ATS-friendly, and well-structured. Use a modern and clean design.
+
+                **Instructions:**
+                - Use a professional and confident tone.
+                - Create a concise and impactful "Career Objective" or "Summary" section at the top.
+                - For "Work Experience," write strong, action-oriented bullet points for responsibilities and quantifiable achievements.
+                - Organize the content logically into sections: Contact Information, Career Objective, Work Experience, Skills, Education, Certifications, and Additional Information.
+                - Format the output as a JSON object with a single key 'resume_html' containing the complete HTML for the resume. Do not include any text outside of the JSON block.
+
+                **User Information:**
+                - Full Name: ${formData.fullName}
+                - Phone: ${formData.phone}
+                - Email: ${formData.email}
+                - Location: ${formData.location}
+                - LinkedIn: ${formData.hasLinkedIn ? formData.linkedin : 'N/A'}
+                - Job Title: ${formData.hasWorkExperience ? formData.jobTitle : 'N/A'}
+                - Duration: ${formData.hasWorkExperience ? formData.duration : 'N/A'}
+                - Main Responsibilities: ${formData.hasWorkExperience ? formData.responsibilities : 'N/A'}
+                - Achievements: ${formData.hasWorkExperience ? formData.achievements : 'N/A'}
+                - Skills: ${formData.skills || 'N/A'}
+                - Highest Qualification: ${formData.education || 'N/A'}
+                - Ongoing Training: ${formData.hasDeshpande ? 'Deshpande Skilling' : 'N/A'}
+                - Certifications: ${formData.certifications || 'N/A'}
+                - Languages: ${formData.languages || 'N/A'}
+                - Hobbies/Interests: ${formData.hobbies || 'N/A'}
+                
+                **Output Template (JSON):**
+                {
+                    "resume_html": "<!-- The complete, self-contained HTML for the resume goes here. -->"
+                }
+                `;
+
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json"
+                    }
+                };
+
+                let retries = 0;
+                const maxRetries = 3;
+                let response;
+
+                while (retries < maxRetries) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            break;
+                        } else {
+                            retries++;
+                            await new Promise(res => setTimeout(res, 2 ** retries * 1000));
+                        }
+                    } catch (error) {
+                        retries++;
+                        await new Promise(res => setTimeout(res, 2 ** retries * 1000));
+                    }
+                }
+
+                loadingIndicator.classList.add('hidden');
+
+                if (!response || !response.ok) {
+                    resumeOutput.innerHTML = `<p class="text-red-500 text-center">Failed to generate resume. Please check your network and try again.</p>`;
+                    editButton.classList.remove('hidden');
+                    return;
+                }
+
+                try {
+                    const result = await response.json();
+                    const resumeHtml = JSON.parse(result.candidates?.[0]?.content?.parts?.[0]?.text)?.resume_html;
+
+                    if (resumeHtml) {
+                        resumeOutput.innerHTML = resumeHtml;
+
+                        // Add buttons
+                        downloadPdfButton.classList.remove('hidden');
+                        downloadDocxButton.classList.remove('hidden');
+                        editButton.classList.remove('hidden');
+
+                    } else {
+                        resumeOutput.innerHTML = `<p class="text-red-500 text-center">Could not generate the resume. The AI response was not in the expected format.</p>`;
+                        editButton.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    resumeOutput.innerHTML = `<p class="text-red-500 text-center">An unexpected error occurred while processing the AI response.</p>`;
+                    console.error('Error processing AI response:', error);
+                    editButton.classList.remove('hidden');
+                }
+            }
+            
             // Handle PDF download
             downloadPdfButton.addEventListener('click', () => {
-                // Get the resume content as a DOM element
                 const element = document.getElementById('resume-output');
-
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                let y = 15; // starting y position
+                let y = 15;
                 const margin = 15;
                 const lineHeight = 7;
 
-                // Function to add text with wrapping
                 const addText = (text, x, y, style = {}) => {
                     const splitText = doc.splitTextToSize(text, 180);
                     doc.text(splitText, x, y);
                     return y + (splitText.length * lineHeight);
                 };
 
-                // Add Full Name and contact info
                 doc.setFontSize(22);
                 doc.text(element.querySelector('h1').innerText, 105, y, null, null, 'center');
                 y += 8;
@@ -282,7 +426,6 @@
                 addText(contactInfo, 105, y, { align: 'center' });
                 y += 10;
                 
-                // Add all sections
                 element.querySelectorAll('h2').forEach(heading => {
                     doc.setFontSize(16);
                     doc.setTextColor(51, 51, 51);
@@ -341,21 +484,18 @@
 
             // Handle DOCX download
             downloadDocxButton.addEventListener('click', () => {
-                const formData = new FormData(form);
-                const data = Object.fromEntries(formData.entries());
-
                 const { Document, HeadingLevel, Paragraph, TextRun, Packer } = docx;
 
                 const doc = new Document({
                     sections: [{
                         children: [
                             new Paragraph({
-                                text: data.fullName,
+                                text: formData.fullName,
                                 heading: HeadingLevel.TITLE,
                                 alignment: docx.AlignmentType.CENTER,
                             }),
                             new Paragraph({
-                                text: `${data.location} | ${data.phone} | ${data.email}${data.hasLinkedIn ? ` | LinkedIn: ${data.linkedin}` : ''}`,
+                                text: `${formData.location} | ${formData.phone} | ${formData.email}${formData.hasLinkedIn ? ` | LinkedIn: ${formData.linkedin}` : ''}`,
                                 alignment: docx.AlignmentType.CENTER,
                                 style: {
                                     font: 'Inter',
@@ -366,51 +506,51 @@
                             new Paragraph({ text: '' }), // Spacer
                             
                             // Career Objective
-                            ... (data.careerObjective ? [
+                            ... (formData.careerObjective ? [
                                 new Paragraph({ text: 'Career Objective', heading: HeadingLevel.HEADING_2 }),
-                                new Paragraph({ text: data.careerObjective, style: 'Normal' }),
+                                new Paragraph({ text: formData.careerObjective, style: 'Normal' }),
                             ] : []),
                             
                             // Work Experience
-                            ... (data.jobTitle ? [
+                            ... (formData.jobTitle ? [
                                 new Paragraph({ text: 'Work Experience', heading: HeadingLevel.HEADING_2 }),
                                 new Paragraph({
                                     children: [
-                                        new TextRun({ text: data.jobTitle, bold: true }),
-                                        new TextRun({ text: `\n${data.duration}`, style: { italic: true } }),
+                                        new TextRun({ text: formData.jobTitle, bold: true }),
+                                        new TextRun({ text: `\n${formData.duration}`, style: { italic: true } }),
                                     ],
                                 }),
-                                ... (data.responsibilities ? data.responsibilities.split(/[\n,]+/).map(item => new Paragraph({ text: item.trim(), bullet: { level: 0 } })) : []),
-                                ... (data.achievements ? [
+                                ... (formData.responsibilities ? formData.responsibilities.split(/[\n,]+/).map(item => new Paragraph({ text: item.trim(), bullet: { level: 0 } })) : []),
+                                ... (formData.achievements ? [
                                     new Paragraph({ text: 'Achievements:', bold: true }),
-                                    ...data.achievements.split(/[\n,]+/).map(item => new Paragraph({ text: item.trim(), bullet: { level: 0 } })),
+                                    ...formData.achievements.split(/[\n,]+/).map(item => new Paragraph({ text: item.trim(), bullet: { level: 0 } })),
                                 ] : []),
                             ] : []),
 
                             // Skills
-                            ... (data.skills ? [
+                            ... (formData.skills ? [
                                 new Paragraph({ text: 'Skills', heading: HeadingLevel.HEADING_2 }),
-                                new Paragraph({ text: data.skills }),
+                                new Paragraph({ text: formData.skills }),
                             ] : []),
 
                             // Education
-                            ... (data.education || data.hasDeshpande ? [
+                            ... (formData.education || formData.hasDeshpande ? [
                                 new Paragraph({ text: 'Education', heading: HeadingLevel.HEADING_2 }),
-                                ... (data.education ? [new Paragraph({ text: data.education })] : []),
-                                ... (data.hasDeshpande ? [new Paragraph({ text: 'Ongoing Training at Deshpande Skilling' })] : []),
+                                ... (formData.education ? [new Paragraph({ text: formData.education })] : []),
+                                ... (formData.hasDeshpande ? [new Paragraph({ text: 'Ongoing Training at Deshpande Skilling' })] : []),
                             ] : []),
                             
                             // Certifications
-                            ... (data.certifications ? [
+                            ... (formData.certifications ? [
                                 new Paragraph({ text: 'Certifications', heading: HeadingLevel.HEADING_2 }),
-                                new Paragraph({ text: data.certifications }),
+                                new Paragraph({ text: formData.certifications }),
                             ] : []),
 
                             // Languages and Hobbies
-                            ... (data.languages || data.hobbies ? [
+                            ... (formData.languages || formData.hobbies ? [
                                 new Paragraph({ text: 'Additional Information', heading: HeadingLevel.HEADING_2 }),
-                                ... (data.languages ? [new Paragraph({ text: `Languages: ${data.languages}` })] : []),
-                                ... (data.hobbies ? [new Paragraph({ text: `Interests: ${data.hobbies}` })] : []),
+                                ... (formData.languages ? [new Paragraph({ text: `Languages: ${formData.languages}` })] : []),
+                                ... (formData.hobbies ? [new Paragraph({ text: `Interests: ${formData.hobbies}` })] : []),
                             ] : []),
                         ],
                     }]
@@ -420,79 +560,6 @@
                     saveAs(blob, 'my_resume.docx');
                 });
             });
-
-            /**
-             * Generates the complete HTML string for the resume.
-             * @param {object} data - The form data.
-             * @returns {string} The HTML string for the resume.
-             */
-            function generateResume(data) {
-                // Split multi-line or comma-separated strings into arrays
-                const responsibilities = data.responsibilities ? data.responsibilities.split(/[\n,]+/).map(item => item.trim()).filter(item => item) : [];
-                const achievements = data.achievements ? data.achievements.split(/[\n,]+/).map(item => item.trim()).filter(item => item) : [];
-                const skills = data.skills ? data.skills.split(/[\n,]+/).map(item => item.trim()).filter(item => item) : [];
-
-                return `
-                    <div class="text-center pb-4">
-                        <h1 class="text-3xl font-bold">${data.fullName}</h1>
-                        <p class="text-gray-600 mt-1">${data.location} | ${data.phone} | ${data.email}
-                            ${data.hasLinkedIn ? ` | <a href="${data.linkedin}" class="text-blue-500 hover:underline" target="_blank">LinkedIn</a>` : ''}
-                        </p>
-                    </div>
-
-                    ${data.careerObjective ? `
-                    <h2 class="text-xl text-gray-700 mt-4">Career Objective</h2>
-                    <p class="text-gray-600 mt-2">${data.careerObjective}</p>
-                    ` : ''}
-                    
-                    ${data.jobTitle && data.duration ? `
-                    <h2 class="text-xl text-gray-700 mt-4">Work Experience</h2>
-                    <div class="mt-2">
-                        <h3 class="font-semibold text-gray-800">${data.jobTitle}</h3>
-                        <p class="text-gray-500 italic text-sm">${data.duration}</p>
-                        ${responsibilities.length > 0 ? `
-                        <ul class="list-disc list-inside mt-2 text-gray-600 space-y-1 ml-4">
-                            ${responsibilities.map(resp => `<li>${resp}</li>`).join('')}
-                        </ul>
-                        ` : ''}
-                        ${achievements.length > 0 ? `
-                        <p class="font-semibold text-gray-700 mt-2">Achievements:</p>
-                        <ul class="list-disc list-inside mt-1 text-gray-600 space-y-1 ml-4">
-                            ${achievements.map(ach => `<li>${ach}</li>`).join('')}
-                        </ul>
-                        ` : ''}
-                    </div>
-                    ` : ''}
-
-                    ${skills.length > 0 ? `
-                    <h2 class="text-xl text-gray-700 mt-4">Skills</h2>
-                    <ul class="flex flex-wrap gap-2 mt-2 text-gray-600">
-                        ${skills.map(skill => `<li class="bg-gray-200 rounded-full px-3 py-1 text-sm skill-tag">${skill}</li>`).join('')}
-                    </ul>
-                    ` : ''}
-
-                    ${data.education || data.hasDeshpande ? `
-                    <h2 class="text-xl text-gray-700 mt-4">Education</h2>
-                    <div class="mt-2 text-gray-600">
-                        ${data.education ? `<p>${data.education}</p>` : ''}
-                        ${data.hasDeshpande ? `<p>Ongoing Training at Deshpande Skilling</p>` : ''}
-                    </div>
-                    ` : ''}
-
-                    ${data.certifications ? `
-                    <h2 class="text-xl text-gray-700 mt-4">Certifications</h2>
-                    <p class="mt-2 text-gray-600">${data.certifications}</p>
-                    ` : ''}
-
-                    ${data.languages || data.hobbies ? `
-                    <h2 class="text-xl text-gray-700 mt-4">Additional Information</h2>
-                    <div class="mt-2 text-gray-600">
-                        ${data.languages ? `<p><strong>Languages:</strong> ${data.languages}</p>` : ''}
-                        ${data.hobbies ? `<p><strong>Interests:</strong> ${data.hobbies}</p>` : ''}
-                    </div>
-                    ` : ''}
-                `;
-            }
         };
     </script>
 </body>
